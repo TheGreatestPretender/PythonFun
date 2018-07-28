@@ -1,5 +1,6 @@
 import zipfile
 
+from threading import Thread
 def extractingFile(zFile, password):
     try:
         zFile.extractall(pwd = password)
@@ -14,10 +15,9 @@ def main():
 
     for line in passFile.readlines():
         psw = line.strip('\n') #only one password per line
-        guess = extractingFile(zFile, password)
-        if guess:
-            print '[+] Password = ' + password + '\n'
-            exit(0)
+        #threading allows us to test multiple cases of passwords
+        t = Thread(target=extractingFile, args=(zFile, psw))
+        t.start()
 
 if __name__ == '__main__':
     main()
