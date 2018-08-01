@@ -2,23 +2,6 @@ import optparse
 import socket
 from socket import *
 
-#available cli options
-parser = optparse.OptionParser('usage %prog -h <target host> -p <target port>')
-parser.add_option('-h', dest='tgtHost', type='string', help='specify  target host')
-parser.add_option('-p', dest='tgtPort', type='int', help='specify target port')
-
-#create instance of options parser
-(options, args) = parser.parse_args()
-tgtHost = options.tgtHost
-tgtPort = options.tgtPort
-
-#if user doesn't enter either target host or port, error and show usage
-if (tgtHost == None) | (tgtPort == None):
-    print parser.usage
-    exit(0)
-
-
-
 def connScan(tgtHost, tgtPort):
     try:
         #AF_INET: what type of addresses we are using
@@ -29,8 +12,12 @@ def connScan(tgtHost, tgtPort):
         connSoc = socket(AF_INET, SOCK_STREAM)
         #connect to target port using target host address
         connSoc.connect((tgtHost, tgtPort))
+        connSoc.send('ViolentPython\r\n')
 
+        #recv() returns the amount of data (in bits) available
+        results = connSoc.recv(100)
         print '[+]%d/TCP open' % tgtPort
+        print '[+] ' + str(results)
         #always close socket
         connSock.close()
 
@@ -39,7 +26,7 @@ def connScan(tgtHost, tgtPort):
         print '[-]%d/TCP closed' % tgtPort
 
 
-def portScan(tgtHost, tgtPort):
+def portScan(tgtHost, tgtPorts):
     try:
         tgtIP = gethostbyname(tgtHost)
 
@@ -62,6 +49,23 @@ def portScan(tgtHost, tgtPort):
         print 'Scanning port ' + tgtPort
         connScan(tgtHost, int(tgtPort))
 
-#still don't know what the point of this is
+
+def main():
+    parser = optparse.OptionParser("usage%prog -H <target host> -p <target port>")
+
+    parser.add_option('-H', dest = 'tgtHost', type = 'string', help = 'specify target host')
+    parser.add_option('-p', dest = 'tgtPort', type = 'string', help = 'specify target port(s)')
+
+    (options, args) = parser.parse_args()
+
+    tgtHost = options.tgtHost
+    tgtPorts = str(options.tgtPort).split(',')
+
+    if (tgtHost == None) | (tgtPorts[0] == None):
+        print '[-] You must specify a target host and port(s)'
+        exit(0)
+
+    portScan(tgtHost, tgtPorts)
+
 if __name__ == '__main__':
     main()
