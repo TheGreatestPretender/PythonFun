@@ -12,7 +12,7 @@ def nmapScan(tgtHost, tgtPort):
     #actually scanning when given host and port
     nmScan.scan(tgtHost, tgtPort)
     #gives the state of the current scan
-    state = nmScan[tgtHost]['tcp'][int(tgtPort)]['state']
+    state = nmScan[tgtHost]['tcp'][float(tgtPort)]['state']
 
     print " [*] " + tgtHost + " TCP/" + tgtPort + " " + state
 
@@ -27,9 +27,9 @@ def main():
 
         (options, args) = parser.parse_args()
 
-        #for some reason will not split at , therefore only using first port written
+        #fixed by removing space character after comma
         tgtHost = options.tgtHost
-        tgtPorts = str(options.tgtPort).split(', ')
+        tgtPorts = str(options.tgtPort).split(',')
 
         if (tgtHost == None) | (tgtPorts[0] == None):
             print parser.usage
